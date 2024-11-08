@@ -10,7 +10,6 @@ WORKDIR /src
 # Copy the solution file and restore dependencies first
 COPY ./dotnet-hello-world.sln /src/
 COPY ./hello-world-api/hello-world-api.csproj /src/hello-world-api/
-docker build --no-cache -t your-image-name .
 
 # Restore dependencies (this step should be done separately from copying all the files to leverage Docker cache)
 RUN dotnet restore /src/dotnet-hello-world.sln
@@ -20,7 +19,7 @@ COPY . /src/
 
 # Set the working directory to where the project is copied and publish the app
 WORKDIR /src
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish -c Release -o /app
 
 # Final stage: Use the runtime image to run the app
 FROM base AS final
