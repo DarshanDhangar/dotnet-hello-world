@@ -9,10 +9,10 @@ WORKDIR /src
 
 # Copy the project file and restore dependencies first
 # Ensure dotnet-hello-world.proj is in the root of the repository or adjust the path accordingly
-COPY ./dotnet-hello-world.sln /src/
+COPY ./dotnet-hello-world.csproj /src/
 
 # Restore dependencies (this step should be done separately from copying all the files to leverage Docker cache)
-RUN dotnet restore /src/dotnet-hello-world.sln
+RUN dotnet restore /src/dotnet-hello-world.csproj
 
 # Copy the rest of the application files (this is done after restore to cache dependencies properly)
 COPY . /src/
