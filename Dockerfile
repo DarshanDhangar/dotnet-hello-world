@@ -8,8 +8,9 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 
 # Copy the project file and restore dependencies
-COPY dotnet-hello-world.proj ./
-RUN dotnet restore
+COPY . /app
+WORKDIR /app
+RUN dotnet restore dotnet-hello-world.proj
 
 # Copy the rest of the application files and publish
 COPY . .
