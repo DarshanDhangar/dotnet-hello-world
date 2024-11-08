@@ -24,6 +24,7 @@ RUN dotnet publish -c Release -o /app/publish
 # Final stage: Use the runtime image to run the app
 FROM base AS final
 WORKDIR /app
+COPY ./hello-world-api/hello-world-api.csproj /src/hello-world-api/
 
 # Copy the published files from the build stage
 COPY --from=build /app/publish .
