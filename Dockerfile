@@ -7,9 +7,9 @@ EXPOSE 80
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 
-# Copy the project file and restore dependencies first
-# Ensure dotnet-hello-world.proj is in the root of the repository or adjust the path accordingly
+# Copy the solution file and restore dependencies first
 COPY ./dotnet-hello-world.sln /src/
+COPY ./hello-world-api/hello-world-api.csproj /src/hello-world-api/
 
 # Restore dependencies (this step should be done separately from copying all the files to leverage Docker cache)
 RUN dotnet restore /src/dotnet-hello-world.sln
@@ -24,10 +24,9 @@ RUN dotnet publish -c Release -o /app/publish
 # Final stage: Use the runtime image to run the app
 FROM base AS final
 WORKDIR /app
-COPY ./hello-world-api/hello-world-api.csproj /src/hello-world-api/
 
 # Copy the published files from the build stage
 COPY --from=build /app/publish .
 
 # Set the entry point for the application
-ENTRYPOINT ["dotnet", "dotnet-hello-world.dll"]
+ENTRYPOINT ["dotnet", "hello-world-api.dll"]
