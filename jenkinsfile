@@ -1,31 +1,81 @@
-# Use .NET Core runtime image as base image (for running the application)
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
-WORKDIR /app
-EXPOSE 80
+pipeline {
+    agent any
 
-# Build stage: Use SDK to build the application
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
-WORKDIR /src
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-pwd')  // Define in Jenkins
+        AWS_CREDENTIALS = credentials('aws-credentials')       // Define in Jenkins  --> install AWS credential plugin
 
-# Copy the project file and restore dependencies first
-COPY ./dotnet-hello-world.proj /src/
+        // Parameters for Docker image and deployment
+        DOCKER_IMAGE_NAME = "darshandhangar/dotnet-hello-world"
+        ENVIRONMENT = "${params.ENVIRONMENT}"
+    }
 
-# Restore dependencies (this step should be done separately from copying all the files to leverage Docker cache)
-RUN dotnet restore /src/dotnet-hello-world.proj
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ['UAT', 'PRODUCTION'], description: 'Choose deployment environment')
+    }
 
-# Copy the rest of the application files (this is done after restore to cache dependencies properly)
-COPY . /src/
+    stages {
+        stage('Clone Repository') {
+            steps {
+                    git url: 'https://github.com/DarshanDhangar/dotnet-hello-world.git'
+            }
+        }
 
-# Set the working directory to where the project is copied and publish the app
-WORKDIR /src
-RUN dotnet publish -c Release -o /app/publish
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("${DOCKER_IMAGE_NAME}:${env.BUILD_ID}")
+                }
+            }
+        }
 
-# Final stage: Use the runtime image to run the app
-FROM base AS final
-WORKDIR /app
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
+                        def image = docker.build("${DOCKER_IMAGE_NAME}:${env.BUILD_ID}")
+                        image.push()
+                        image.push("latest")
+                    }
+                }
+            }
+        }
 
-# Copy the published files from the build stage
-COPY --from=build /app/publish . 
+        stage('Deploy to AWS EC2') {
+            steps {
+                script {
+                    def ec2InstanceIp = (params.ENVIRONMENT == 'UAT') ? 'UAT_IP' : 'PRODUCTION_IP'
+                    
+                    sshagent(['aws-ec2-ssh']) {
+                        // Remove existing container and run new container on EC2
+                        sh """
+                            ssh -o StrictHostKeyChecking=no ubuntu@${ec2InstanceIp} '
+                            docker pull ${DOCKER_IMAGE_NAME}:${env.BUILD_ID} &&
+                            docker stop dotnet-hello-world || true &&
+                            docker rm dotnet-hello-world || true &&
+                            docker run -d --name dotnet-hello-world -p 80:80 ${DOCKER_IMAGE_NAME}:${env.BUILD_ID}'
+                        """
+                    }
+                }
+            }
+        }
 
-# Set the entry point for the application
-ENTRYPOINT ["dotnet", "dotnet-hello-world.dll"]
+        stage('Health Check') {
+            steps {
+                script {
+                    def ec2InstanceIp = (params.ENVIRONMENT == 'UAT') ? 'UAT_IP' : 'PRODUCTION_IP'
+                    sh "curl -f http://${ec2InstanceIp}:80 || exit 1"
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Deployment succeeded!'
+        }
+        failure {
+            echo 'Deployment failed.'
+        }
+    }
+}
