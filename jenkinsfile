@@ -7,9 +7,10 @@ pipeline {
 
         DOCKER_IMAGE_NAME = "darshandhangar/dotnet-hello-world"
         ENVIRONMENT = "${params.ENVIRONMENT}"
+        UAT_IP = '3.110.124.156'
+        PRODUCTION_IP = '13.233.152.203'
     }
-    def UAT_IP = '3.110.124.156'
-    def PRODUCTION_IP = '13.233.152.203'
+    
     parameters {
         choice(name: 'ENVIRONMENT', choices: ['UAT', 'PRODUCTION'], description: 'Choose deployment environment')
     }
