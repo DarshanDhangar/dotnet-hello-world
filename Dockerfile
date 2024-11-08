@@ -25,8 +25,8 @@ RUN dotnet publish -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 
-// Copy the published files from the build stage
+# Copy the published files from the build stage
 COPY --from=build /app/publish .
 
-// Set the entry point for the application
+# Set the entry point for the application
 ENTRYPOINT ["dotnet", "dotnet-hello-world.dll"]
