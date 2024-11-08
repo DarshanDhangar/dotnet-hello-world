@@ -8,6 +8,7 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 
 # Copy the project file and restore dependencies first
+# Ensure dotnet-hello-world.proj is in the root of the repository or adjust the path accordingly
 COPY ./dotnet-hello-world.proj /src/
 
 # Restore dependencies (this step should be done separately from copying all the files to leverage Docker cache)
