@@ -4,6 +4,8 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-pwd')  // Define in Jenkins
         AWS_CREDENTIALS = credentials('aws-credentials')       // Define in Jenkins  --> install AWS credential plugin
+        AWS_ACCESS_KEY_ID = "${AWS_CREDENTIALS_USR}"               // Map AWS Access Key
+        AWS_SECRET_ACCESS_KEY = "${AWS_CREDENTIALS_PSW}" 
 
         DOCKER_IMAGE_NAME = "darshandhangar/dotnet-hello-world"
         ENVIRONMENT = "${params.ENVIRONMENT}"
