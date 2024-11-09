@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-pwd')  // Define in Jenkins
         DOCKER_IMAGE_NAME = "darshandhangar/dotnet-hello-world"
-        ENVIRONMENT = "${params.ENVIRONMENT}"        
+        ENVIRONMENT = "${params.ENVIRONMENT}"
     }
 
     parameters {
@@ -21,11 +21,12 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
+                    // Debugging Docker access
+                    echo "Checking Docker version"
+                    sh "docker --version"  // Verify Docker is installed and accessible
+                    
                     echo "Building Docker image"
-                    // Force bash shell usage
-                    sh '''#!/bin/bash
-                        docker build -t "${DOCKER_IMAGE_NAME}:${env.BUILD_ID}" --no-cache -f Dockerfile .
-                    '''
+                    docker.build("${DOCKER_IMAGE_NAME}:${env.BUILD_ID}", "--no-cache -f Dockerfile .")
                 }
             }
         }
@@ -51,13 +52,13 @@ pipeline {
 
                         sshagent(['aws-ec2-ssh']) {
                             // Remove existing container and run new container on EC2
-                            sh '''#!/bin/bash
+                            sh """
                                 ssh -o StrictHostKeyChecking=no ubuntu@${ec2InstanceIp} '
-                                sudo docker pull ${DOCKER_IMAGE_NAME}:${env.BUILD_ID} &&
-                                sudo docker stop dotnet-hello-world || true &&
-                                sudo docker rm dotnet-hello-world || true &&
-                                sudo docker run -d --name dotnet-hello-world -p 80:80 ${DOCKER_IMAGE_NAME}:${env.BUILD_ID}'
-                            '''
+                                docker pull ${DOCKER_IMAGE_NAME}:${env.BUILD_ID} &&
+                                docker stop dotnet-hello-world || true &&
+                                docker rm dotnet-hello-world || true &&
+                                docker run -d --name dotnet-hello-world -p 80:80 ${DOCKER_IMAGE_NAME}:${env.BUILD_ID}'
+                            """
                         }
                     }
                 }
@@ -68,9 +69,7 @@ pipeline {
             steps {
                 script {
                     def ec2InstanceIp = (params.ENVIRONMENT == 'UAT') ? 'UAT_IP' : 'PRODUCTION_IP'
-                    sh '''#!/bin/bash
-                        curl -f http://${ec2InstanceIp}:80 || exit 1
-                    '''
+                    sh "curl -f http://${ec2InstanceIp}:80 || exit 1"
                 }
             }
         }
