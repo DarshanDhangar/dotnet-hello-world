@@ -15,7 +15,7 @@ pipeline {
     stages {
         stage('git checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Kausar1011/Ekart.git'
+                git branch: 'master', url: 'https://github.com/DarshanDhangar/dotnet-hello-world.git'
             }
         }
 
