@@ -1,6 +1,6 @@
 pipeline {
     agent {
-       label 'UAT'  // Specify the label of your new node
+       label 'UAT-node'  // Specify the label of your new node
    }
 
     environment {
