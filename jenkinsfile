@@ -14,9 +14,9 @@ pipeline {
     }
 
     stages {
-        stage('Clone Repository') {
+         stage('git checkout') {
             steps {
-                git branch: 'master', url: 'https://github.com/DarshanDhangar/dotnet-hello-world.git', tool: 'Default Git'
+                git branch: 'master', url: 'https://github.com/DarshanDhangar/dotnet-hello-world.git'
             }
         }
     
