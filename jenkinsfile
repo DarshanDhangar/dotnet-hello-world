@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+       label 'UAT'  // Specify the label of your new node
+   }
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-pwd')  // Define in Jenkins
