@@ -22,10 +22,11 @@ pipeline {
             steps {
                 script {
                     echo "Building Docker image"
-                    docker.build("${DOCKER_IMAGE_NAME}:${env.BUILD_ID}", "--no-cache -f Dockerfile .")
+                    sh "sudo docker build -t ${DOCKER_IMAGE_NAME}:${env.BUILD_ID} --no-cache -f Dockerfile ."
                 }
             }
         }
+
 
         stage('Push Docker Image to Docker Hub') {
             steps {
