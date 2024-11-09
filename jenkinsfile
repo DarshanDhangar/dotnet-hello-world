@@ -12,9 +12,9 @@ pipeline {
     }
 
     stages {
-        stage('Clone Repository') {
+        stage('git checkout') {
             steps {
-                git url: 'https://github.com/DarshanDhangar/dotnet-hello-world.git'
+                git branch: 'main', url: 'https://github.com/Kausar1011/Ekart.git'
             }
         }
 
