@@ -12,18 +12,18 @@ pipeline {
     }
 
     stages {
-         stage('git checkout') {
+        stage('git checkout') {
             steps {
                 git branch: 'master', url: 'https://github.com/DarshanDhangar/dotnet-hello-world.git'
             }
         }
-    
 
         stage('Build Docker Image') {
             steps {
                 script {
                     echo "Building Docker image"
-                    docker.build("${DOCKER_IMAGE_NAME}:${env.BUILD_ID}", "--no-cache -f Dockerfile .")
+                    // Add sudo to the docker build command
+                    sh 'sudo docker build -t "${DOCKER_IMAGE_NAME}:${env.BUILD_ID}" --no-cache -f Dockerfile .'
                 }
             }
         }
@@ -51,10 +51,10 @@ pipeline {
                             // Remove existing container and run new container on EC2
                             sh """
                                 ssh -o StrictHostKeyChecking=no ubuntu@${ec2InstanceIp} '
-                                docker pull ${DOCKER_IMAGE_NAME}:${env.BUILD_ID} &&
-                                docker stop dotnet-hello-world || true &&
-                                docker rm dotnet-hello-world || true &&
-                                docker run -d --name dotnet-hello-world -p 80:80 ${DOCKER_IMAGE_NAME}:${env.BUILD_ID}'
+                                sudo docker pull ${DOCKER_IMAGE_NAME}:${env.BUILD_ID} &&
+                                sudo docker stop dotnet-hello-world || true &&
+                                sudo docker rm dotnet-hello-world || true &&
+                                sudo docker run -d --name dotnet-hello-world -p 80:80 ${DOCKER_IMAGE_NAME}:${env.BUILD_ID}'
                             """
                         }
                     }
