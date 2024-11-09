@@ -4,9 +4,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-pwd')  // Define in Jenkins
         DOCKER_IMAGE_NAME = "darshandhangar/dotnet-hello-world"
-        ENVIRONMENT = "${params.ENVIRONMENT}"
-        GIT_TOOL = tool name: 'Default Git'  // This name should match the Git tool configured in Global Tool Configuration
-        
+        ENVIRONMENT = "${params.ENVIRONMENT}"        
     }
 
     parameters {
