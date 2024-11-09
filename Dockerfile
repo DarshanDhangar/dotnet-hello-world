@@ -11,15 +11,21 @@ WORKDIR /src
 COPY ./dotnet-hello-world.sln /src/
 COPY ./hello-world-api/hello-world-api.csproj /src/hello-world-api/
 
+# Debugging: Check if the files are copied correctly
+RUN ls -R /src
+
 # Restore dependencies (this step should be done separately from copying all the files to leverage Docker cache)
-RUN dotnet restore /src/dotnet-hello-world.sln
+RUN dotnet restore /src/dotnet-hello-world.sln --verbosity detailed
 
 # Copy the rest of the application files (this is done after restore to cache dependencies properly)
 COPY . /src/
 
+# Debugging: Check the project structure again
+RUN ls -R /src
+
 # Set the working directory to where the project is copied and publish the app
 WORKDIR /src
-RUN dotnet publish /src/hello-world-api/hello-world-api.csproj -c Release -o /app
+RUN dotnet publish /src/hello-world-api/hello-world-api.csproj -c Release -o /app --verbosity detailed
 
 # Final stage: Use the runtime image to run the app
 FROM base AS final
