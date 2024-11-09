@@ -26,7 +26,7 @@ RUN ls -R /src
 
 # Set the working directory to where the project is copied and publish the app
 WORKDIR /src
-RUN dotnet publish /src/hello-world-api/hello-world-api.csproj -c Release -o /app --verbosity detailed
+RUN sudo dotnet publish /hello-world-api/hello-world-api.csproj -c Release -o /app --verbosity detailed
 
 # Final stage: Use the runtime image to run the app
 FROM base AS final
