@@ -12,12 +12,14 @@ pipeline {
         choice(name: 'ENVIRONMENT', choices: ['UAT', 'PRODUCTION'], description: 'Choose deployment environment')
     }
 
-    stages {
-        stage('git checkout') {
-            steps {
-                git branch: 'master', url: 'https://github.com/DarshanDhangar/dotnet-hello-world.git'
+    stage('git checkout') {
+        steps {
+            script {
+                // Use the 'Default Git' tool explicitly
+                git branch: 'master', url: 'https://github.com/DarshanDhangar/dotnet-hello-world.git', tool: 'Default Git'
             }
-        }
+         }
+     }
 
         stage('Build Docker Image') {
             steps {
