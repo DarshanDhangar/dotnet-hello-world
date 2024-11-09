@@ -2,22 +2,18 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-pwd')  // Define in Jenkins
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-pwd')
         DOCKER_IMAGE_NAME = "darshandhangar/dotnet-hello-world"
-        ENVIRONMENT = "${params.ENVIRONMENT}"        
-    }
-
-    parameters {
-        choice(name: 'ENVIRONMENT', choices: ['UAT', 'PRODUCTION'], description: 'Choose deployment environment')
+        ENVIRONMENT = "${params.ENVIRONMENT}"
+        GIT_TOOL = tool name: 'Default Git'  // Ensure this matches the Git tool configuration in Jenkins
     }
 
     stages {
-         stage('git checkout') {
+        stage('Clone Repository') {
             steps {
-                git branch: 'master', url: 'https://github.com/DarshanDhangar/dotnet-hello-world.git'
+                git branch: 'main', url: 'https://github.com/DarshanDhangar/dotnet-hello-world.git', tool: 'Default Git'
             }
         }
-    
 
         stage('Build Docker Image') {
             steps {
@@ -28,56 +24,6 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image to Docker Hub') {
-            steps {
-                script {
-                    echo "Pushing Docker image to Docker Hub"
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
-                        def image = docker.build("${DOCKER_IMAGE_NAME}:${env.BUILD_ID}")
-                        image.push()
-                        image.push("latest")
-                    }
-                }
-            }
-        }
-
-        stage('Deploy to AWS EC2') {
-            steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
-                    script {
-                        def ec2InstanceIp = (params.ENVIRONMENT == 'UAT') ? 'UAT_IP' : 'PRODUCTION_IP'
-
-                        sshagent(['aws-ec2-ssh']) {
-                            // Remove existing container and run new container on EC2
-                            sh """
-                                ssh -o StrictHostKeyChecking=no ubuntu@${ec2InstanceIp} '
-                                docker pull ${DOCKER_IMAGE_NAME}:${env.BUILD_ID} &&
-                                docker stop dotnet-hello-world || true &&
-                                docker rm dotnet-hello-world || true &&
-                                docker run -d --name dotnet-hello-world -p 80:80 ${DOCKER_IMAGE_NAME}:${env.BUILD_ID}'
-                            """
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Health Check') {
-            steps {
-                script {
-                    def ec2InstanceIp = (params.ENVIRONMENT == 'UAT') ? 'UAT_IP' : 'PRODUCTION_IP'
-                    sh "curl -f http://${ec2InstanceIp}:80 || exit 1"
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Deployment succeeded!'
-        }
-        failure {
-            echo 'Deployment failed.'
-        }
+        // Other stages...
     }
 }
