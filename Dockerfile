@@ -15,7 +15,7 @@ COPY ./hello-world-api/hello-world-api.csproj /src/hello-world-api/
 RUN ls -R /src
 
 # Restore dependencies (this step should be done separately from copying all the files to leverage Docker cache)
-RUN dotnet restore /src/dotnet-hello-world.sln --verbosity detailed
+RUN sudo dotnet restore /src/dotnet-hello-world.sln --verbosity detailed
 
 # Copy the rest of the application files (this is done after restore to cache dependencies properly)
 COPY . /src/
