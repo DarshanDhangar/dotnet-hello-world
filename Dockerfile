@@ -19,14 +19,14 @@ COPY . /src/
 
 # Set the working directory to where the project is copied and publish the app
 WORKDIR /src
-RUN dotnet publish -c Release -o /app
+RUN dotnet publish /src/hello-world-api/hello-world-api.csproj -c Release -o /app
 
 # Final stage: Use the runtime image to run the app
 FROM base AS final
 WORKDIR /app
 
 # Copy the published files from the build stage
-COPY --from=build /app/publish .
+COPY --from=build /app .  # Ensure this matches the output of the publish
 
 # Set the entry point for the application
 ENTRYPOINT ["dotnet", "hello-world-api.dll"]
