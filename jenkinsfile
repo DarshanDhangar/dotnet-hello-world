@@ -45,7 +45,7 @@ pipeline {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
                     script {
-                        def ec2InstanceIp = (params.ENVIRONMENT == 'UAT') ? 'UAT_IP' : 'PRODUCTION_IP'
+                        def ec2InstanceIp = (params.ENVIRONMENT == 'UAT') ? '43.204.149.209' : '3.109.210.158'
 
                         sshagent(['aws-ec2-ssh']) {
                             // Remove existing container and run new container on EC2
@@ -65,7 +65,7 @@ pipeline {
         stage('Health Check') {
             steps {
                 script {
-                    def ec2InstanceIp = (params.ENVIRONMENT == 'UAT') ? 'UAT_IP' : 'PRODUCTION_IP'
+                    def ec2InstanceIp = (params.ENVIRONMENT == 'UAT') ? '43.204.149.209' : '3.109.210.158'
                     sh "curl -f http://${ec2InstanceIp}:80 || exit 1"
                 }
             }
