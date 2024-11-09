@@ -5,6 +5,7 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-pwd')  // Define in Jenkins
         DOCKER_IMAGE_NAME = "darshandhangar/dotnet-hello-world"
         ENVIRONMENT = "${params.ENVIRONMENT}"
+        GIT_TOOL = tool name: 'Default Git'  // This name should match the Git tool configured in Global Tool Configuration
         
     }
 
@@ -15,7 +16,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git url: 'https://github.com/DarshanDhangar/dotnet-hello-world.git'
+                git branch: 'master', url: 'https://github.com/DarshanDhangar/dotnet-hello-world.git', tool: 'Default Git'
             }
         }
     
