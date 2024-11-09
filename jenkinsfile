@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-pwd')  // Define in Jenkins
+        AWS_CREDENTIALS = credentials('aws-credentials') 
         DOCKER_IMAGE_NAME = "darshandhangar/dotnet-hello-world"
         ENVIRONMENT = "${params.ENVIRONMENT}"
     }
