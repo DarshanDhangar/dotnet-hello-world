@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-pwd')  // Define in Jenkins
         DOCKER_IMAGE_NAME = "darshandhangar/dotnet-hello-world"
-        ENVIRONMENT = "${params.ENVIRONMENT}"
+        ENVIRONMENT = "${params.ENVIRONMENT}"        
     }
 
     parameters {
@@ -12,19 +12,15 @@ pipeline {
     }
 
     stages {
-        stage('git checkout') {
+        stage('Clone Repository') {
             steps {
-                git branch: 'master', url: 'https://github.com/DarshanDhangar/dotnet-hello-world.git'
+                git url: 'https://github.com/DarshanDhangar/dotnet-hello-world.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Debugging Docker access
-                    echo "Checking Docker version"
-                    sh "docker --version"  // Verify Docker is installed and accessible
-                    
                     echo "Building Docker image"
                     docker.build("${DOCKER_IMAGE_NAME}:${env.BUILD_ID}", "--no-cache -f Dockerfile .")
                 }
