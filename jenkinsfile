@@ -22,8 +22,10 @@ pipeline {
             steps {
                 script {
                     echo "Building Docker image"
-                    // Add sudo to the docker build command
-                    sh 'sudo docker build -t "${DOCKER_IMAGE_NAME}:${env.BUILD_ID}" --no-cache -f Dockerfile .'
+                    // Force bash shell usage
+                    sh '''#!/bin/bash
+                        docker build -t "${DOCKER_IMAGE_NAME}:${env.BUILD_ID}" --no-cache -f Dockerfile .
+                    '''
                 }
             }
         }
@@ -49,13 +51,13 @@ pipeline {
 
                         sshagent(['aws-ec2-ssh']) {
                             // Remove existing container and run new container on EC2
-                            sh """
+                            sh '''#!/bin/bash
                                 ssh -o StrictHostKeyChecking=no ubuntu@${ec2InstanceIp} '
                                 sudo docker pull ${DOCKER_IMAGE_NAME}:${env.BUILD_ID} &&
                                 sudo docker stop dotnet-hello-world || true &&
                                 sudo docker rm dotnet-hello-world || true &&
                                 sudo docker run -d --name dotnet-hello-world -p 80:80 ${DOCKER_IMAGE_NAME}:${env.BUILD_ID}'
-                            """
+                            '''
                         }
                     }
                 }
@@ -66,7 +68,9 @@ pipeline {
             steps {
                 script {
                     def ec2InstanceIp = (params.ENVIRONMENT == 'UAT') ? 'UAT_IP' : 'PRODUCTION_IP'
-                    sh "curl -f http://${ec2InstanceIp}:80 || exit 1"
+                    sh '''#!/bin/bash
+                        curl -f http://${ec2InstanceIp}:80 || exit 1
+                    '''
                 }
             }
         }
